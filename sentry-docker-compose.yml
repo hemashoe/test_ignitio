@@ -1,0 +1,43 @@
+version: '3'
+services:
+  sentry:
+    image: getsentry/sentry:latest
+    ports:
+      - "9000:9000"
+    environment:
+      - SENTRY_SECRET_KEY=akjsdhfljkahlskjdsfhkahkj
+      - SENTRY_POSTGRES_HOST=sentry-postgres
+      - SENTRY_DB_USER=sentry
+      - SENTRY_DB_PASSWORD=sentrypassword
+      - SENTRY_REDIS_HOST=sentry-redis
+
+  sentry-postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_PASSWORD=sentrypassword
+      - POSTGRES_USER=sentry
+      - POSTGRES_DB=sentry
+
+  sentry-redis:
+    image: redis:latest
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.15.0
+    volumes:
+      - ./logstash/config:/usr/share/logstash/config
+      - ./logs:/logs 
+    command: logstash -f /usr/share/logstash/config/logstash.conf
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.15.0
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200

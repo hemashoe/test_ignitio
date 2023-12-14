@@ -4,6 +4,7 @@ from random import choice
 class PaymentError(Exception):
     pass
 
+
 def pay(cart):
     """
     Returns True if payment is succeeded.
