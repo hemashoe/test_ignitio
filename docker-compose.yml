@@ -4,10 +4,3 @@ services:
     build: .
     ports:
       - "5000:5000"
-
-  scale_service:
-    image: alpine 
-    command: sh -c 'echo scaling service... && sleep infinity' 
-
-    deploy:
-      replicas: 5 

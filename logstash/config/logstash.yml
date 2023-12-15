@@ -1,4 +1,11 @@
-pipeline:
-  batch:
-    size: 125
-    delay: 50
+input {
+    tcp {
+    port => 5959
+    codec => json
+  }
+}
+output {
+  elasticsearch {
+    hosts => ["localhost:9200"]
+  }
+}
