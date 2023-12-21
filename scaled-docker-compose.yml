@@ -1,8 +1,0 @@
-version: '3'
-services:
-  web:
-    build: .
-    ports:
-      - "5000-5004:5000"
-    deploy:
-      replicas: 5

@@ -1,30 +1,37 @@
 version: '3'
 services:
   sentry:
-    image: getsentry/sentry:latest
+    image: getsentry/sentry:21.7.0  
     ports:
       - "9000:9000"
     environment:
-      - SENTRY_SECRET_KEY=akjsdhfljkahlskjdsfhkahkj
+      - SENTRY_SECRET_KEY={OriL`2Pc+hq0=c_tuzPR'CP8v]WRHo5 
       - SENTRY_POSTGRES_HOST=sentry-postgres
       - SENTRY_DB_USER=sentry
       - SENTRY_DB_PASSWORD=sentrypassword
       - SENTRY_REDIS_HOST=sentry-redis
+      - SENTRY_DB_NAME=sentry
 
   sentry-postgres:
-    image: postgres:latest
+    image: "bitnami/postgresql:latest"
     environment:
       - POSTGRES_PASSWORD=sentrypassword
       - POSTGRES_USER=sentry
       - POSTGRES_DB=sentry
+    volumes:
+      - pgdb:/var/lib/postgresql/data
+
 
   sentry-redis:
     image: redis:latest
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    container_name: elasticsearch
     environment:
       - discovery.type=single-node
+    volumes:
+      - ./elk/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -32,13 +39,23 @@ services:
 
   logstash:
     image: docker.elastic.co/logstash/logstash:7.15.2
+    container_name: logstash
     volumes:
-      - ./elk/logstash/:/usr/share/logstash/config/
-    command: logstash -f /usr/share/logstash/config/logstash.conf
+      - ./elk/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    environment:
+      - "LS_JAVA_OPTS=-Xmx256m -Xms256m"
+    depends_on:
+      - elasticsearch
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.15.2
-    ports:
-      - "5601:5601"
+    container_name: kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+volumes:
+   pgdb:
